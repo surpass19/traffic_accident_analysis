@@ -100,5 +100,41 @@ traffic_accident_data['day_night_type'] = list(map(lambda text:multiple_replace(
 ```
 
 
+# U-Traffic_Accident_EDA.ipynb
+
+## matplotlib日本語表示
+```
+from matplotlib import rcParams
+rcParams['font.family'] = 'sans-serif'
+rcParams['font.sans-serif'] = ['Hiragino Maru Gothic Pro', 'Yu Gothic', 'Meirio', 'Takao', 'IPAexGothic', 'IPAPGothic', 'VL PGothic', 'Noto Sans CJK JP']
+```
 
 
+## Groupby → Plot
+```
+def GroupbyPlot(df:pd.DataFrame,
+                             group:str,
+                             target:str,
+                             y_label:str,
+                             x_label:str):
+    group_name_summary = df.groupby(group)[target].agg([np.mean, "count"])
+    index_list = group_name_summary.index.tolist()
+    
+    group_name_summary = group_name_summary.reset_index()
+    
+    fig, ax = plt.subplots(figsize=(13,5))
+    ax3 = ax.twinx()
+    rspine = ax3.spines['right'] 
+    rspine.set_position(('axes', 1.15))
+    ax3.set_frame_on(True)
+    ax3.patch.set_visible(False)
+    fig.subplots_adjust(right=0.7)
+    group_name_summary["mean"].plot(ax=ax, style='r-', kind="line")
+    group_name_summary["count"].plot(ax=ax, secondary_y=True,kind="bar",color='b',alpha=0.5 );
+    # ax.set_title('');
+    ax.set_ylabel(y_label);
+    ax.set_xlabel(x_label); 
+    ax.set_xticklabels(index_list);
+    ax3.set_ylabel('count');
+    return group_name_summary
+```
