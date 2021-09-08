@@ -62,7 +62,40 @@ df = df.apply(dfに対する処理) → 全ての行に処理が適応
 https://www.delftstack.com/ja/howto/python-pandas/difference-between-pandas-apply-map-and-applymap/
 
 
+## 正規表現を使ったreplace
 
+```
+import re
+
+def multiple_replace(text, adict):
+    rx = re.compile('|'.join(adict))
+    
+    def dedictkey(text):
+        for key in adict.keys():
+            if re.search(key, text):
+                return key
+ 
+    def one_xlat(match):
+        return adict[dedictkey(match.group(0))]
+ 
+    return rx.sub(one_xlat, text)
+```
+```
+replace_list = {'1':'上','2':'下','0':'対象外'}
+traffic_accident_data['road_updown_type'] = list(map(lambda text:multiple_replace(text, replace_list) ,
+                                                                                traffic_accident_data['上下線'].astype(str)))
+                                                                                
+replace_list = {'11':'昼－明',
+                      '12':' 昼－昼',
+                      '13':' 昼－暮',
+                      '21':'夜－暮',
+                      '22':'夜－夜',
+                      '23':'夜－明'
+                        }
+
+traffic_accident_data['day_night_type'] = list(map(lambda text:multiple_replace(text, replace_list) ,
+                                                                                traffic_accident_data['昼夜'].astype(str)))
+```
 
 
 
