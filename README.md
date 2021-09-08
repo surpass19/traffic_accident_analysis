@@ -222,3 +222,100 @@ def latlon2mesh(lat, lon):
     
     return third_mesh
 ```
+
+# U-Traffic_Accident_LGBM.ipynb
+
+## 特徴量ごとの特徴量作成(Groupby)
+
+```
+# メッシュごとの特徴量作成用
+mesh_df = traffic_accident_data[(traffic_accident_data.accident_date > "2019-01-01") &\
+                                                   (traffic_accident_data.accident_date < "2019-09-01")].reset_index(drop=True)
+
+mesh_summary_df = mesh_df.groupby('third_mesh')['death_flag'].agg([np.sum, "count"]).reset_index()
+mesh_summary_df.columns = ["third_mesh", "death_count", "accident_count"]
+mesh_summary_df.tail()
+# ---------------------------------- #
+third_mesh	death_count	accident_count
+44738	68410593	0	1
+44739	68410594	0	1
+44740	68410680	0	1
+44741	68411042	0	1
+44742	68411504	0	1
+# ---------------------------------- #
+
+summary_column_name_list = ["road_type","road_bypass","road_updown_type","day_night_type","weather_type",
+                                                "terrain_type","road_condition_type","road_shape_type","traffic_lights_type",
+                                                "pause_sign_type_a","pause_sign_type_b","pause_display_type_a","pause_display_type_b",
+                                                "road_width_type","road_alignment_type","zone_regulation_type",
+                                                "pedestrian_road_division_type","accident_vehicle_type","age_type_a","age_type_b",
+                                                "parties_type_a","parties_type_b","use_type_a","use_type_b","vehicle_shape_type_a",
+                                                "vehicle_shape_type_b","speed_regulation_type_a","speed_regulation_type_b",
+                                                "collision_site_type_a","collision_site_type_b","damage_to_vehicle_type_a",
+                                                "damage_to_vehicle_type_b","airbag_equipment_type_a","airbag_equipment_type_b",
+                                                "side_airbag_equipment_type_a","side_airbag_equipment_type_b","weekday_type","holiday_type"]
+
+for each_variable_name in summary_column_name_list:
+    df_pv = pd.pivot_table(data=mesh_df,
+                                       fill_value=0,
+                                       index="third_mesh",
+                                       columns=each_variable_name,
+                                       aggfunc = {each_variable_name:"count"}).reset_index()
+    
+    column_list = [df_pv.columns.levels[0][1]]
+    add_column_list = [ each_variable_name + "_" + str(_) for _ in df_pv.columns.levels[1].tolist()[:-1]]
+    column_list.extend(add_column_list)
+    df_pv.columns = column_list
+    mesh_summary_df = pd.merge(mesh_summary_df, df_pv, on="third_mesh", how="left")
+    print(each_variable_name)
+```
+内訳, (参考にできる → Github : U-youtube-scraping_to_visualization/visualizing.ipynb)
+```
+df_pv = pd.pivot_table(data=mesh_df,
+                                       fill_value=0,
+                                       index="third_mesh",
+                                       columns=each_variable_name,
+                                       aggfunc = {each_variable_name:"count"}).reset_index()
+# ---------------------------------- #
+third_mesh	holiday_type
+holiday_type		その他	前日	当日
+0	36235060	1	0	0
+1	36243193	2	0	0
+2	36244049	2	0	0
+3	36244101	1	0	0
+4	36244102	12	0	0
+...	...	...	...	...
+44738	68410593	1	0	0
+44739	68410594	1	0	0
+44740	68410680	1	0	0
+44741	68411042	1	0	0
+44742	68411504	0	0	1
+# ---------------------------------- #
+
+column_list = [df_pv.columns.levels[0][1]]
+# ---------------------------------- #
+['third_mesh']
+# ---------------------------------- #
+
+add_column_list = [ each_variable_name + "_" + str(_) for _ in df_pv.columns.levels[1].tolist()[:-1]]
+# ---------------------------------- #
+['holiday_type_その他', 'holiday_type_前日', 'holiday_type_当日']
+# ---------------------------------- #
+
+df_pv.columns = column_list
+df_pv
+# ---------------------------------- #
+third_mesh	holiday_type_その他	holiday_type_前日	holiday_type_当日
+0	36235060	1	0	0
+1	36243193	2	0	0
+2	36244049	2	0	0
+3	36244101	1	0	0
+4	36244102	12	0	0
+...	...	...	...	...
+44738	68410593	1	0	0
+44739	68410594	1	0	0
+44740	68410680	1	0	0
+44741	68411042	1	0	0
+44742	68411504	0	0	1
+# ---------------------------------- #
+```
