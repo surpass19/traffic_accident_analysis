@@ -2,12 +2,11 @@
 
 ## numpy.where()
 dfに条件処理によって値を変える
+numpy.where()は、条件式conditionを満たす場合（真Trueの場合）はx、満たさない場合（偽Falseの場合）はyとするndarrayを返す関数。
 ```
 traffic_accident_data["accident_type"] = \
 np.where(traffic_accident_data["事故内容"] == 1, "死亡", np.where(traffic_accident_data["事故内容"] == 2, "負傷", None))
-```
-numpy.where()は、条件式conditionを満たす場合（真Trueの場合）はx、満たさない場合（偽Falseの場合）はyとするndarrayを返す関数。
-```
+
 if traffic_accident_data["事故内容"] == 1:
     死亡
 elif traffic_accident_data["事故内容"] == 2:
@@ -15,6 +14,19 @@ elif traffic_accident_data["事故内容"] == 2:
 else:
     None
 ```
+```
+traffic_accident_data["road_bypass"] = np.where(traffic_accident_data.road_cd_l1 > 0, "バイパス区間",
+                                                                           np.where(traffic_accident_data.road_cd_l1 == 0, "現道区間又は包括路線", None))
+                                                                           
+if traffic_accident_data.road_cd_l1 > 0:
+    バイパス区間
+elif traffic_accident_data.road_cd_l1 == 0:
+    現道区間又は包括路線
+else:
+    None
+```
+
+
 ## map関数
 DataFrame の**特定のcolumn**に対してのみ map() メソッドを使用することができます。
 ```
