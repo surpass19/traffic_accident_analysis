@@ -1,5 +1,7 @@
 # traffic_accident_analysis
 
+# U-Traffic_Accident_processing.ipynb
+
 ## numpy.where()
 dfに条件処理によって値を変える
 numpy.where()は、条件式conditionを満たす場合（真Trueの場合）はx、満たさない場合（偽Falseの場合）はyとするndarrayを返す関数。
