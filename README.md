@@ -138,3 +138,87 @@ def GroupbyPlot(df:pd.DataFrame,
     ax3.set_ylabel('count');
     return group_name_summary
 ```
+
+## 地域メッシュ
+
+地域メッシュ（ちいきメッシュ）とは、統計に利用するために、緯度・経度に基づいて地域をほぼ同じ大きさの網の目（メッシュ）に分けたものである。メッシュを識別するためのコードを地域メッシュコードと言う。（地域メッシュ - Wikipedia）
+
+地域メッシュは区分の方法により、大きさの異なるいくつかの区画が定められています。
+
+・１次メッシュ: 一辺約80km.
+・２次メッシュ: 一辺約10km. １次メッシュを縦横８分割したもの。
+・３次メッシュ: 一辺約1km. ２次メッシュを縦横10分割したもの。
+・４次メッシュ: 一辺約500m. ３次メッシュを縦横2分割したもの。
+・５次メッシュ: 一辺約250m. ４次メッシュを縦横2分割したもの。
+・６次メッシュ: 一辺約125m. ５次メッシュを縦横2分割したもの。
+
+### 地域メッシュから緯度経度を割り出すサンプルコード
+```
+def get_latlon(meshCode):
+
+    # 文字列に変換
+    meshCode = str(meshCode)
+
+    # １次メッシュ用計算
+    code_first_two = meshCode[0:2]
+    code_last_two = meshCode[2:4]
+    code_first_two = int(code_first_two)
+    code_last_two = int(code_last_two)
+    lat  = code_first_two * 2 / 3
+    lon = code_last_two + 100
+
+    if len(meshCode) > 4:
+        # ２次メッシュ用計算
+        if len(meshCode) >= 6:
+            code_fifth = meshCode[4:5]
+            code_sixth = meshCode[5:6]
+            code_fifth = int(code_fifth)
+            code_sixth = int(code_sixth)
+            lat += code_fifth * 2 / 3 / 8
+            lon += code_sixth / 8
+
+        # ３次メッシュ用計算
+        if len(meshCode) == 8:
+            code_seventh = meshCode[6:7]
+            code_eighth = meshCode[7:8]
+            code_seventh = int(code_seventh)
+            code_eighth = int(code_eighth)
+            lat += code_seventh * 2 / 3 / 8 / 10
+            lon += code_eighth / 8 / 10
+
+    print(lat, lon)
+```
+###  地域メッシュから地域メッシュを割り出すサンプルコード
+```
+def latlon2mesh(lat, lon):
+    #1次メッシュ上2けた
+    quotient_lat, remainder_lat = divmod(lat * 60, 40)
+    first2digits = str(quotient_lat)[0:2]
+
+    #1次メッシュ下2けた
+    last2digits = str(lon - 100)[0:2]
+    remainder_lon = lon - int(last2digits) - 100
+
+    #1次メッシュ
+    first_mesh = first2digits + last2digits
+
+    #2次メッシュ上1けた
+    first1digits, remainder_lat = divmod(remainder_lat, 5)
+
+    #2次メッシュ下1けた
+    last1digits, remainder_lon = divmod(remainder_lon * 60, 7.5)
+
+    #2次メッシュ
+    second_mesh = first_mesh + str(first1digits)[0:1] + str(last1digits)[0:1]
+
+    #3次メッシュ上1けた
+    first1digits, remainder_lat = divmod(remainder_lat * 60, 30)
+
+    #3次メッシュ下1けた
+    last1digits, remainder_lon = divmod(remainder_lon * 60, 45)
+
+    #3次メッシュ
+    third_mesh = second_mesh + str(first1digits)[0:1] + str(last1digits)[0:1]
+    
+    return third_mesh
+```
